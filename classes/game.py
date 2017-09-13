@@ -91,21 +91,44 @@ class Person:
         mp_ticks = (self.mp / self.maxmp) * 100 / 10
 
         while bar_ticks > 0:
-            hp_bar += chr(2012)
+            hp_bar += "█"
             bar_ticks -= 1
 
         while len(hp_bar) < 25:
             hp_bar += " "
 
         while mp_ticks > 0:
-            mp_bar += chr(2012)
+            mp_bar += "█"
             mp_ticks -= 1
 
         while len(mp_bar) < 10:
             mp_bar += " "
 
-        print("                    ________________________________         _____________")
-        print(bcolors.BOLD + self.name + "      " + str(self.hp) + "/" + str(self.maxhp) + "|" +
-              bcolors.OKGREEN + '{:<25}'.format(hp_bar) + bcolors.ENDC + bcolors.BOLD + "|  " + str(self.mp) + "/" +
-              str(self.maxmp) + "|" + bcolors.OKBLUE + '{:10}'.format(mp_bar) + bcolors.ENDC + bcolors.BOLD + "|" +
-              bcolors.ENDC)
+        hp_string = str(self.hp) + "/" + str(self.maxhp)
+        current_hp = ""
+
+        if len(hp_string) < 9:
+            decreased = 9 - len(hp_string)
+
+            while decreased > 0:
+                current_hp += " "
+                decreased -= 1
+
+            hp_string = current_hp + hp_string
+
+        mp_string = str(self.mp) + "/" + str(self.maxmp)
+        current_mp = ""
+
+        if len(mp_string) < 8:
+            decreased = 8 - len(hp_string)
+
+            while decreased > 0:
+                current_mp += " "
+                decreased -= 1
+
+            mp_string = current_mp + mp_string
+
+        print("                       _______________________________________            ________________")
+        print(bcolors.BOLD + self.name + "      " +
+              hp_string + " |" + bcolors.OKGREEN + hp_bar + bcolors.ENDC + "|    " +
+              mp_string + " |" + bcolors.OKBLUE + mp_bar + bcolors.ENDC + bcolors.BOLD + "|" + bcolors.ENDC)
