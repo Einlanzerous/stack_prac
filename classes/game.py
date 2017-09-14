@@ -32,7 +32,7 @@ class Person:
     def take_damage(self, dmg):
         self.hp -= dmg
 
-        if (self.hp < 0):
+        if self.hp < 0:
             self.hp = 0
 
         return self.hp
@@ -79,9 +79,49 @@ class Person:
         i = 1
 
         print("\n" + bcolors.OKGREEN + bcolors.BOLD + "\tITEMS:" + bcolors.ENDC)
+
         for item in self.items:
             print("    \t" + str(i) + ".", item["item"].name + ":", item["item"].description, " (x" + str(item["quantity"]) + ")")
             i += 1
+
+    def choose_target(self, enemies):
+        count = 1
+
+        print("\n" + bcolors.FAIL + bcolors.BOLD + "\tTARGET:" + bcolors.ENDC)
+
+        for enemy in enemies:
+            print("\t\t" + str(count) + ".", enemy.name)
+            count += 1
+
+        choice = int(input("\tChoose target:")) - 1
+        return choice
+
+    def get_enemy_stats(self):
+        hp_bar = ""
+        bar_ticks = (self.hp / self.maxhp) * 100 / 2
+
+        while bar_ticks > 0:
+            hp_bar += "█"
+            bar_ticks -= 1
+
+        while len(hp_bar) < 50:
+            hp_bar += " "
+
+        hp_string = str(self.hp) + "/" + str(self.maxhp)
+        current_hp = ""
+
+        if len(hp_string) < 11:
+            decreased = 11 - len(hp_string)
+
+            while decreased > 0:
+                current_hp += " "
+                decreased -= 1
+
+            hp_string = current_hp + hp_string
+
+        print("                       __________________________________________________")
+        print(bcolors.BOLD + '{:>8}'.format(self.name) + "  " +
+              '{:>9}'.format(hp_string) + " |" + bcolors.FAIL + hp_bar + bcolors.ENDC + "|" + bcolors.ENDC)
 
     def get_stats(self):
         hp_bar = ""
@@ -105,30 +145,23 @@ class Person:
             mp_bar += " "
 
         hp_string = str(self.hp) + "/" + str(self.maxhp)
-        current_hp = ""
-
-        if len(hp_string) < 9:
-            decreased = 9 - len(hp_string)
-
-            while decreased > 0:
-                current_hp += " "
-                decreased -= 1
-
-            hp_string = current_hp + hp_string
-
         mp_string = str(self.mp) + "/" + str(self.maxmp)
-        current_mp = ""
 
-        if len(mp_string) < 8:
-            decreased = 8 - len(hp_string)
+        print("                       _________________________              __________")
+        print(bcolors.BOLD + '{:<5}'.format(self.name) + ":      " +
+              '{:>9}'.format(hp_string) + " |" + bcolors.OKGREEN + hp_bar + bcolors.ENDC + "|    " +
+              '{:>7}'.format(mp_string) + " |" + bcolors.OKBLUE + mp_bar + bcolors.ENDC + bcolors.BOLD + "|" + bcolors.ENDC)
 
-            while decreased > 0:
-                current_mp += " "
-                decreased -= 1
+    def choose_enemy_spell(self):
+        magic_choice = random.randrange(0, len(self.magic))
 
-            mp_string = current_mp + mp_string
+        spell = self.magic[magic_choice]
+        magic_dmg = spell.generate_damage()
 
-        print("                       _______________________________________            ________________")
-        print(bcolors.BOLD + self.name + "      " +
-              hp_string + " |" + bcolors.OKGREEN + hp_bar + bcolors.ENDC + "|    " +
-              mp_string + " |" + bcolors.OKBLUE + mp_bar + bcolors.ENDC + bcolors.BOLD + "|" + bcolors.ENDC)
+        pct = (self.hp / self.maxhp * 100)
+
+        # Known issue that in rare situations, can recurse forever here.
+        if self.mp < spell.cost or spell.type == "white" and pct > 50:
+            return self.choose_enemy_spell()
+        else:
+            return spell, magic_dmg
